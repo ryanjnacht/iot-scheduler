@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "iot_scheduler": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
