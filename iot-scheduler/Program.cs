@@ -15,7 +15,7 @@ namespace iot_scheduler
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) => { services.AddHostedService<Worker>(); })
+                .ConfigureServices((hostContext, services) => { services.AddHostedService<ScheduleWorker>(); })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<WebApiStartup>(); });
         }
     }

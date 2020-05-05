@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace iot_scheduler
 {
-    public class Worker : BackgroundService
+    public class ScheduleWorker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger<ScheduleWorker> _logger;
 
-        public Worker(ILogger<Worker> logger)
+        public ScheduleWorker(ILogger<ScheduleWorker> logger)
         {
             _logger = logger;
             StatusRepository.RunningSchedules = new List<Schedule>();
@@ -28,10 +28,7 @@ namespace iot_scheduler
                 foreach (var scheduleObj in DataAccess<Schedule>.GetRecords().FindAll(x => x.ShouldRun())
                     .Where(scheduleObj => StatusRepository.RunningSchedules.All(x => x.Id != scheduleObj.Id)))
                 {
-                    foreach (var deviceObj in scheduleObj.Devices)
-                    {
-                        WebClient.Get(deviceObj.StartUrl);
-                    }
+                    foreach (var deviceObj in scheduleObj.Devices) WebClient.Get(deviceObj.StartUrl);
 
                     scheduleObj.Started = DateTime.Now;
 
@@ -42,10 +39,7 @@ namespace iot_scheduler
                 foreach (var scheduleObj in StatusRepository.RunningSchedules.ToList().Where(scheduleObj =>
                     !scheduleObj.ShouldRun()))
                 {
-                    foreach (var deviceObj in scheduleObj.Devices)
-                    {
-                        WebClient.Get(deviceObj.EndUrl);
-                    }
+                    foreach (var deviceObj in scheduleObj.Devices) WebClient.Get(deviceObj.EndUrl);
 
                     StatusRepository.RunningSchedules.Remove(scheduleObj);
                 }

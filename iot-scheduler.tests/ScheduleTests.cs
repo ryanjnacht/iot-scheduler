@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using FluentAssertions;
 using iot_scheduler.Entities;
 using NUnit.Framework;

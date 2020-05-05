@@ -47,7 +47,7 @@ namespace iot_scheduler
             var result = collection.Find(_ => true).ToList();
             return result;
         }
-        
+
         public static void DeleteRecord(string id)
         {
             var collection = MongoDatabase.GetCollection<T>(CollectionName);

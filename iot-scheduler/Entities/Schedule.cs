@@ -9,11 +9,11 @@ namespace iot_scheduler.Entities
     public class Schedule : IEntity
     {
         [JsonProperty("days")] public int[]? Days;
-        [JsonProperty("end_time")] public TimeSpan EndTime;
-        [JsonProperty("start_time")] public TimeSpan StartTime;
         [JsonProperty("devices")] public List<Device> Devices;
+        [JsonProperty("end_time")] public TimeSpan EndTime;
         [JsonIgnore] public DateTime Started;
-        [JsonIgnore] public DateTime EndsAt => Started.Add(EndTime.Subtract(StartTime));
+        [JsonProperty("start_time")] public TimeSpan StartTime;
+
         public Schedule(string startTime, int duration, int[]? days, List<Device> devices)
         {
             Id = Guid.NewGuid().ToString();
@@ -23,6 +23,8 @@ namespace iot_scheduler.Entities
             Devices = devices;
         }
 
+        [JsonIgnore] public DateTime EndsAt => Started.Add(EndTime.Subtract(StartTime));
+
         [BsonElement("_id")]
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -30,10 +32,8 @@ namespace iot_scheduler.Entities
         public bool ShouldRun()
         {
             if (Days != null && Days.Any())
-            {
                 if (!Days.Contains((int) DateTime.Now.DayOfWeek))
                     return false;
-            }
 
             var now = DateTime.Now.TimeOfDay;
 

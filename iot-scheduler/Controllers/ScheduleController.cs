@@ -23,6 +23,9 @@ namespace iot_scheduler.Controllers
         [HttpPost]
         public Schedule CreateSchedule([FromBody] JObject json)
         {
+            //TODO: accept schedules with no end_time
+            //TODO: accept end_time and calculate duration
+
             var startTime = json["start_time"]?.ToString();
             if (string.IsNullOrEmpty(startTime))
                 throw new Exception("start_time is required");
