@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +9,16 @@ namespace iot_scheduler
     {
         public static void Main(string[] args)
         {
-            AppConfiguration.Load();
+            try
+            {
+                AppConfiguration.Load();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Startup failed: {ex.Message}");
+                return;
+            }
+
             CreateHostBuilder(args).Build().Run();
         }
 

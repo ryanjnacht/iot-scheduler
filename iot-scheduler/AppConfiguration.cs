@@ -10,6 +10,7 @@ namespace iot_scheduler
         private static string? _mongoHost;
         private static int _mongoPort = 27017;
         public static string? IotApiUrl;
+        public static bool UseCache = true;
 
         public static MongoUrl MongoDbUrl =>
             new MongoUrlBuilder
@@ -28,6 +29,11 @@ namespace iot_scheduler
                 throw new Exception("IOT_API is not defined");
 
             //optional
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CACHING")))
+                if (int.TryParse(Environment.GetEnvironmentVariable("CACHING"), out var val) && val == 0)
+                    UseCache = false;
+
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MONGO_DB")))
                 MongoDatabase = Environment.GetEnvironmentVariable("MONGO_DB");
 
@@ -40,6 +46,12 @@ namespace iot_scheduler
             //load
             _mongoHost = Environment.GetEnvironmentVariable("MONGO_HOST");
             IotApiUrl = Environment.GetEnvironmentVariable("IOT_API");
+
+            if (UseCache)
+            {
+                ScheduleRepository.BuildCache();
+                Console.WriteLine("[Configuration] Configured to use in-memory cache.");
+            }
 
             Console.WriteLine($"[Configuration] Configured to use mongo @ {MongoDbUrl}");
             Console.WriteLine($"[Configuration] Configured to use IOT-API @ {IotApiUrl}");

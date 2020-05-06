@@ -11,7 +11,7 @@ namespace iot_scheduler.Entities
         [JsonProperty("days")] public int[]? Days;
         [JsonProperty("devices")] public List<Device> Devices;
         [JsonProperty("end_time")] public TimeSpan EndTime;
-        [JsonIgnore] public DateTime Started;
+        [JsonIgnore] [BsonIgnore] public DateTime Started;
         [JsonProperty("start_time")] public TimeSpan StartTime;
 
         public Schedule(string startTime, int duration, int[]? days, List<Device> devices)

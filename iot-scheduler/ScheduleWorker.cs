@@ -21,16 +21,20 @@ namespace iot_scheduler
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Worker started at: {time}", DateTimeOffset.Now);
+            //todo: one-way schedules (no end)
+
+            _logger.LogInformation("Worker started at: {time}", DateTime.Now);
             while (!stoppingToken.IsCancellationRequested)
             {
                 //new schedules
-                foreach (var scheduleObj in DataAccess<Schedule>.GetRecords().FindAll(x => x.ShouldRun())
+                foreach (var scheduleObj in ScheduleRepository.GetRecords().FindAll(x => x.ShouldRun())
                     .Where(scheduleObj => StatusRepository.RunningSchedules.All(x => x.Id != scheduleObj.Id)))
                 {
-                    foreach (var deviceObj in scheduleObj.Devices) WebClient.Get(deviceObj.StartUrl);
-
                     scheduleObj.Started = DateTime.Now;
+                    _logger.LogInformation($"Schedule {scheduleObj.Id} started at: {scheduleObj.Started}");
+
+                    foreach (var deviceObj in scheduleObj.Devices)
+                        WebClient.Get(deviceObj.StartUrl);
 
                     StatusRepository.RunningSchedules.Add(scheduleObj);
                 }

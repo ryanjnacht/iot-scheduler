@@ -17,7 +17,7 @@ namespace iot_scheduler.Controllers
         [HttpGet]
         public List<Schedule> GetSchedules()
         {
-            return DataAccess<Schedule>.GetRecords();
+            return ScheduleRepository.GetRecords();
         }
 
         [HttpPost]
@@ -53,14 +53,14 @@ namespace iot_scheduler.Controllers
 
             var scheduleObj = new Schedule(startTime, (int) duration, days, devices);
 
-            DataAccess<Schedule>.Insert(scheduleObj);
-            return DataAccess<Schedule>.GetRecord(scheduleObj.Id);
+            ScheduleRepository.Insert(scheduleObj);
+            return ScheduleRepository.GetRecord(scheduleObj.Id);
         }
 
         [HttpDelete("{id}")]
         public void Delete(string id)
         {
-            DataAccess<Schedule>.DeleteRecord(id);
+            ScheduleRepository.DeleteRecord(id);
         }
     }
 }
