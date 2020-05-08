@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using iot_scheduler.Entities;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace iot_scheduler
 {
@@ -36,7 +37,8 @@ namespace iot_scheduler
                     foreach (var deviceObj in scheduleObj.Devices)
                         WebClient.Get(deviceObj.StartUrl);
 
-                    StatusRepository.RunningSchedules.Add(scheduleObj);
+                    if (scheduleObj.EndTime != null)
+                        StatusRepository.RunningSchedules.Add(scheduleObj);
                 }
 
                 //maintain schedules

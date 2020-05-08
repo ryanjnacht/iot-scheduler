@@ -23,7 +23,6 @@ namespace iot_scheduler.Controllers
         [HttpPost]
         public Schedule CreateSchedule([FromBody] JObject json)
         {
-            //TODO: accept schedules with no end_time
             //TODO: accept end_time and calculate duration
 
             var startTime = json["start_time"]?.ToString();
@@ -31,7 +30,7 @@ namespace iot_scheduler.Controllers
                 throw new Exception("start_time is required");
 
             var duration = json["duration"]?.Value<int>();
-            if (duration == null || duration <= 0)
+            if (duration != null || duration <= 0)
                 throw new Exception("a positive duration is required");
 
             int[]? days = null;
@@ -51,7 +50,7 @@ namespace iot_scheduler.Controllers
             if (devices == null)
                 throw new Exception("could not deserialize devices");
 
-            var scheduleObj = new Schedule(startTime, (int) duration, days, devices);
+            var scheduleObj = new Schedule(startTime, duration, days, devices);
 
             ScheduleRepository.Insert(scheduleObj);
             return ScheduleRepository.GetRecord(scheduleObj.Id);

@@ -6,24 +6,29 @@ using Newtonsoft.Json;
 
 namespace iot_scheduler.Entities
 {
+    [BsonIgnoreExtraElements]
     public class Schedule : IEntity
     {
         [JsonProperty("days")] public int[]? Days;
         [JsonProperty("devices")] public List<Device> Devices;
-        [JsonProperty("end_time")] public TimeSpan EndTime;
+        [JsonProperty("end_time")] public TimeSpan? EndTime;
         [JsonIgnore] [BsonIgnore] public DateTime Started;
         [JsonProperty("start_time")] public TimeSpan StartTime;
 
-        public Schedule(string startTime, int duration, int[]? days, List<Device> devices)
+        public Schedule(string startTime, int? duration, int[]? days, List<Device> devices)
         {
             Id = Guid.NewGuid().ToString();
             StartTime = TimeSpan.Parse(startTime);
-            EndTime = StartTime.Add(new TimeSpan(0, 0, duration));
             Days = days;
             Devices = devices;
+
+            if (duration != null)
+                EndTime = StartTime.Add(new TimeSpan(0, 0, (int) duration));
         }
 
-        [JsonIgnore] public DateTime EndsAt => Started.Add(EndTime.Subtract(StartTime));
+        [JsonIgnore]
+        [BsonIgnore]
+        public DateTime EndsAt => EndTime != null ? Started.Add(((TimeSpan) EndTime).Subtract(StartTime)) : default;
 
         [BsonElement("_id")]
         [JsonProperty("id")]
@@ -35,7 +40,12 @@ namespace iot_scheduler.Entities
                 if (!Days.Contains((int) DateTime.Now.DayOfWeek))
                     return false;
 
-            var now = DateTime.Now.TimeOfDay;
+            var now = new TimeSpan(DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes,
+                DateTime.Now.TimeOfDay.Seconds);
+
+            // one-time
+            if (EndTime == null)
+                return StartTime == now;
 
             // see if start comes before end
             if (StartTime < EndTime)
