@@ -11,6 +11,7 @@ namespace iot_scheduler
         private static int _mongoPort = 27017;
         public static string? IotApiUrl;
         public static bool UseCache = true;
+        public static int DeviceRetries = 10;
 
         public static MongoUrl MongoDbUrl =>
             new MongoUrlBuilder
@@ -29,7 +30,6 @@ namespace iot_scheduler
                 throw new Exception("IOT_API is not defined");
 
             //optional
-
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CACHING")))
                 if (int.TryParse(Environment.GetEnvironmentVariable("CACHING"), out var val) && val == 0)
                     UseCache = false;
@@ -42,6 +42,9 @@ namespace iot_scheduler
 
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TIMEOUT")))
                 int.TryParse(Environment.GetEnvironmentVariable("TIMEOUT"), out WebClientTimeout);
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEVICE_RETRIES")))
+                int.TryParse(Environment.GetEnvironmentVariable("DEVICE_RETRIES"), out DeviceRetries);
 
             //load
             _mongoHost = Environment.GetEnvironmentVariable("MONGO_HOST");

@@ -27,7 +27,28 @@ namespace iot_scheduler
                 Parallel.ForEach(ScheduleRepository.GetRecords().FindAll(x => x.ShouldRun(now)), scheduleObj =>
                 {
                     _logger.LogInformation($"Schedule {scheduleObj.Id} running at: {DateTime.Now}");
-                    Parallel.ForEach(scheduleObj.Devices, deviceObj => { WebClient.Get(deviceObj.ActionUrl); });
+
+                    Parallel.ForEach(scheduleObj.Devices, deviceObj =>
+                    {
+                        var retry = 1;
+                        while (true)
+                            try
+                            {
+                                WebClient.Get(deviceObj.ActionUrl);
+                                return;
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(
+                                    $"scheduleId: {scheduleObj.Id}, deviceId: {deviceObj.DeviceId}, " +
+                                    $"attempt: {retry}/{AppConfiguration.DeviceRetries}, error: {ex.Message}");
+
+                                if (retry >= AppConfiguration.DeviceRetries) return;
+
+                                Thread.Sleep(1000 * retry * 5);
+                                retry++;
+                            }
+                    });
                 });
 
                 await Task.Delay(1000, stoppingToken);

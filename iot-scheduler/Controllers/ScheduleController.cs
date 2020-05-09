@@ -27,12 +27,6 @@ namespace iot_scheduler.Controllers
             if (string.IsNullOrEmpty(startTime))
                 throw new Exception("start_time is required");
 
-            /*
-            var duration = json["duration"]?.Value<int>();
-            if (duration != null || duration <= 0)
-                throw new Exception("a positive duration is required");
-            */
-
             int[]? days = null;
             if (json["days"] != null)
                 try
