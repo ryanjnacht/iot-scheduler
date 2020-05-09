@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using iot_scheduler.Extensions;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
 
@@ -11,48 +12,30 @@ namespace iot_scheduler.Entities
     {
         [JsonProperty("days")] public int[]? Days;
         [JsonProperty("devices")] public List<Device> Devices;
-        [JsonProperty("end_time")] public TimeSpan? EndTime;
-        [JsonIgnore] [BsonIgnore] public DateTime Started;
         [JsonProperty("start_time")] public TimeSpan StartTime;
 
-        public Schedule(string startTime, int? duration, int[]? days, List<Device> devices)
+        public Schedule(string startTime, int[]? days, List<Device> devices)
         {
             Id = Guid.NewGuid().ToString();
-            StartTime = TimeSpan.Parse(startTime);
             Days = days;
             Devices = devices;
-
-            if (duration != null)
-                EndTime = StartTime.Add(new TimeSpan(0, 0, (int) duration));
+            StartTime = TimeSpan.Parse(startTime).WithoutMilliseconds();
         }
-
-        [JsonIgnore]
-        [BsonIgnore]
-        public DateTime EndsAt => EndTime != null ? Started.Add(((TimeSpan) EndTime).Subtract(StartTime)) : default;
 
         [BsonElement("_id")]
         [JsonProperty("id")]
         public string Id { get; set; }
 
-        public bool ShouldRun()
+        public bool ShouldRun(TimeSpan? now = null)
         {
-            if (Days != null && Days.Any())
-                if (!Days.Contains((int) DateTime.Now.DayOfWeek))
-                    return false;
+            now ??= DateTime.Now.TimeOfDay.WithoutMilliseconds();
 
-            var now = new TimeSpan(DateTime.Now.TimeOfDay.Hours, DateTime.Now.TimeOfDay.Minutes,
-                DateTime.Now.TimeOfDay.Seconds);
+            Console.WriteLine($"comparing {StartTime} to now {now}");
 
-            // one-time
-            if (EndTime == null)
-                return StartTime == now;
+            if (Days != null && !Days.Contains((int) DateTime.Now.DayOfWeek))
+                return false;
 
-            // see if start comes before end
-            if (StartTime < EndTime)
-                return StartTime <= now && now <= EndTime;
-
-            // start is after end, so do the inverse comparison
-            return !(EndTime < now && now < StartTime);
+            return StartTime == now;
         }
     }
 }

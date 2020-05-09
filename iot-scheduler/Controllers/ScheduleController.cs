@@ -23,15 +23,15 @@ namespace iot_scheduler.Controllers
         [HttpPost]
         public Schedule CreateSchedule([FromBody] JObject json)
         {
-            //TODO: accept end_time and calculate duration
-
             var startTime = json["start_time"]?.ToString();
             if (string.IsNullOrEmpty(startTime))
                 throw new Exception("start_time is required");
 
+            /*
             var duration = json["duration"]?.Value<int>();
             if (duration != null || duration <= 0)
                 throw new Exception("a positive duration is required");
+            */
 
             int[]? days = null;
             if (json["days"] != null)
@@ -39,18 +39,21 @@ namespace iot_scheduler.Controllers
                 {
                     days = ((JArray) json["days"]!).Select(jv => (int) jv).ToArray();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(e);
-                    throw new Exception("could not parse days");
+                    Console.WriteLine(ex);
+                    throw new Exception($"could not parse days: {ex.Message}");
                 }
+
+            if (json["devices"] == null)
+                throw new Exception("devices ia required but was not defined");
 
             var devices = json["devices"]?.Value<JArray>().ToObject<List<Device>>();
 
-            if (devices == null)
+            if (devices == null || !devices.Any())
                 throw new Exception("could not deserialize devices");
 
-            var scheduleObj = new Schedule(startTime, duration, days, devices);
+            var scheduleObj = new Schedule(startTime, days, devices);
 
             ScheduleRepository.Insert(scheduleObj);
             return ScheduleRepository.GetRecord(scheduleObj.Id);

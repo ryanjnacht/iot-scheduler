@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using iot_scheduler.Entities;
 using NUnit.Framework;
 
-namespace iot
+namespace iot_scheduler.tests
 {
     public class Tests
     {
@@ -15,22 +16,19 @@ namespace iot
         [Test]
         public void ValidScheduleNoDays()
         {
-            var startTime = DateTime.Now.AddMinutes(-5).TimeOfDay.ToString();
-            var duration = 60 * 10;
-
-            var scheduleObj = new Schedule(startTime, duration, null, null);
+            var startTime = DateTime.Now.TimeOfDay.ToString();
+            var scheduleObj = new Schedule(startTime, null, new List<Device>());
             scheduleObj.ShouldRun().Should().BeTrue();
         }
 
         [Test]
         public void ValidScheduleWithDays()
         {
-            var startTime = DateTime.Now.AddMinutes(-5).TimeOfDay.ToString();
-            var duration = 60 * 10;
+            var startTime = DateTime.Now.TimeOfDay.ToString();
             var dayOfWeek = (int) DateTime.Now.DayOfWeek;
             int[] days = {dayOfWeek};
 
-            var scheduleObj = new Schedule(startTime, duration, days, null);
+            var scheduleObj = new Schedule(startTime, days, new List<Device>());
             scheduleObj.ShouldRun().Should().BeTrue();
         }
 
@@ -38,9 +36,8 @@ namespace iot
         public void InvalidScheduleNoDays()
         {
             var startTime = DateTime.Now.AddMinutes(5).TimeOfDay.ToString();
-            var duration = 60;
 
-            var scheduleObj = new Schedule(startTime, duration, null, null);
+            var scheduleObj = new Schedule(startTime, null, new List<Device>());
             scheduleObj.ShouldRun().Should().BeFalse();
         }
 
@@ -48,11 +45,10 @@ namespace iot
         public void InvalidValidScheduleWithDays()
         {
             var startTime = DateTime.Now.AddMinutes(-5).TimeOfDay.ToString();
-            var duration = 60 * 10;
             var dayOfWeek = (int) DateTime.Now.AddDays(-1).DayOfWeek;
             int[] days = {dayOfWeek};
 
-            var scheduleObj = new Schedule(startTime, duration, days, null);
+            var scheduleObj = new Schedule(startTime, days, new List<Device>());
             scheduleObj.ShouldRun().Should().BeFalse();
         }
     }
